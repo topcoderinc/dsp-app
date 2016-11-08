@@ -11,10 +11,10 @@
 
 const config = {
   api: {
-    basePath: 'http://localhost:5000',
+    basePath: 'https://kb-dsp-server.herokuapp.com',
   },
   socket: {
-    url: 'http://localhost:5000',
+    url: 'https://kb-dsp-server.herokuapp.com',
   },
   AUTH0_CLIEND_ID: '3CGKzjS2nVSqHxHHE64RhvvKY6e0TYpK',
   AUTH0_DOMAIN: 'dronetest.auth0.com',
