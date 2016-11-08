@@ -1,0 +1,41 @@
+/**
+ * Whole application layout styling
+ */
+#root,
+.full-height {
+  height: 100%;
+}
+.navbar-wrapper {
+  height: 8%;
+}
+.map-container-wrapper > div,
+.map-container-wrapper {
+  height: 100%
+}
+.mission-planner {
+  height: 70%;
+}
+#map-container {
+  height: 100%;
+}
+.col-centered {
+  margin: 0 auto;
+  float: none;
+}
+.info-window-container {
+  max-width: 400px;
+}
+.gm-style-iw {
+  overflow: visible !important;
+}
+.gm-style-iw > div {
+}
+.Select-menu-outer {
+  z-index: 10000000000 !important;
+}
+.m-b-10 {
+  margin-bottom: 10px;
+}
+.full-width {
+  width: 100%;
+}
