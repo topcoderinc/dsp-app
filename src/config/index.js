@@ -11,13 +11,13 @@
 
 const config = {
   api: {
-    basePath: 'http://localhost:3500',
+    basePath: 'http://localhost:5000',
   },
   socket: {
-    url: 'http://localhost:3500',
+    url: 'http://localhost:5000',
   },
-  AUTH0_CLIEND_ID: 'wldYVvBOii71V8tBMhIyt1t2BThIoCHO',
-  AUTH0_DOMAIN: 'spanhawk.auth0.com',
+  AUTH0_CLIEND_ID: '3CGKzjS2nVSqHxHHE64RhvvKY6e0TYpK',
+  AUTH0_DOMAIN: 'dronetest.auth0.com',
 };
 
 export default config;

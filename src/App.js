@@ -59,6 +59,8 @@ class App extends Component {
               <NavItem eventKey={1} href="#/drones">Drones</NavItem>
               <NavItem eventKey={2} href="#/planner">Planner</NavItem>
               <NavItem eventKey={3} onClick={this.logout.bind(this)} >Logout</NavItem>
+              <NavItem eventKey={4} href="#/">test: {process.env.FOO}</NavItem>
+              <NavItem eventKey={5} href="#/">test2: {process.env.BIZ}</NavItem>
             </Nav>
           </Navbar>
           {child}
