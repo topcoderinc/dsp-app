@@ -9,7 +9,7 @@
  * @author       TCSCODER
  * @version      1.0.0
  */
-
+import config from './config';
 import React, { Component } from 'react';
 import './styles/App.css';
 import scriptLoader from 'react-async-script-loader';
@@ -83,5 +83,5 @@ class App extends Component {
 }
 
 export default scriptLoader(
-  ['https://maps.googleapis.com/maps/api/js?key=AIzaSyCR3jfBdv9prCBYBOf-fPUDhjPP4K05YjE', 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js']
+  [`https://maps.googleapis.com/maps/api/js?key=${config.google.apiKey}`, 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js']
 )(App);
