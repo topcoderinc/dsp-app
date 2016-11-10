@@ -19,7 +19,7 @@ const config = {
   google: {
     apiKey: process.env.REACT_APP_GOOGLE_API_KEY
   },
-  AUTH0_CLIEND_ID: process.env.REACT_APP_API_BASE_PATH,
+  AUTH0_CLIEND_ID: process.env.REACT_APP_AUTH0_CLIEND_ID,
   AUTH0_DOMAIN: process.env.REACT_APP_AUTH0_DOMAIN,
 };
 

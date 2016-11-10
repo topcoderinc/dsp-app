@@ -6,7 +6,6 @@ Copy `envSample` as `.env`.
 Install node dependencies using `npm install`
 Run the development server using `npm run start`
 
-The react app is deployed to heroku `https://react-app-drones-spanhawk.herokuapp.com`
 
 # Local Configuration Variables
 You can edit them in `.env` file.
