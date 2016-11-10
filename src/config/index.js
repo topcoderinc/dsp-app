@@ -11,13 +11,16 @@
 
 const config = {
   api: {
-    basePath: 'https://kb-dsp-server.herokuapp.com',
+    basePath: process.env.REACT_APP_API_BASE_PATH,
   },
   socket: {
-    url: 'https://kb-dsp-server.herokuapp.com',
+    url: process.env.REACT_APP_SOCKET_URL,
   },
-  AUTH0_CLIEND_ID: '3CGKzjS2nVSqHxHHE64RhvvKY6e0TYpK',
-  AUTH0_DOMAIN: 'dronetest.auth0.com',
+  google: {
+    apiKey: process.env.REACT_APP_GOOGLE_API_KEY
+  },
+  AUTH0_CLIEND_ID: process.env.REACT_APP_AUTH0_CLIEND_ID,
+  AUTH0_DOMAIN: process.env.REACT_APP_AUTH0_DOMAIN,
 };
 
 export default config;
