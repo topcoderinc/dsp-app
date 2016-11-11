@@ -44,6 +44,17 @@ class UserApi {
         password: password,
       })});
   }
+
+  registerSocialUser(name, email) {
+    const url = `${this.basePath}/api/v1/users/social`;
+
+    return reqwest({ url: url, method: 'post', type: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        name: name,
+        email: email,
+      })});
+  }
 }
 
 export default UserApi;

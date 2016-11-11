@@ -10,6 +10,10 @@
  */
 
 import Auth0Lock from 'auth0-lock'
+import config from '../../../config';
+import UserApi from '../../../api/User.js';
+
+const userApi = new UserApi(config.api.basePath);
 
 export default class AuthService {
 
@@ -28,6 +32,18 @@ export default class AuthService {
   _doAuthentication(authResult, a, b, c) {
     // Saves the user token
     this.setToken(authResult.idToken);
+    var that = this;
+    this.lock.getProfile(authResult.idToken, function(error, profile) {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        userApi.registerSocialUser(profile.name, profile.email).then((authResult) => {
+            that.setToken(authResult.accessToken);
+        }).catch((err) => {
+            console.error(err);
+        });
+    });
   }
 
   login() {
