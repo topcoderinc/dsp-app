@@ -3,63 +3,112 @@
  */
 
 /**
- * The root mission planner component
+ * Mission planner component
  *
  * @author       TCSCODER
  * @version      1.0.0
  */
+import config from '../../config';
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
-import circleGreen from '../../i/circle_green.svg';
-import InfoWindow from './InfoWindow.js';
+import MissionPointList from './MissionPointList.js';
+import MissionMap from './MissionMap.js';
 import { Form, FormGroup, Grid, Row, Col, ButtonToolbar, Button } from 'react-bootstrap';
+import TextInput from '../ui/TextInput';
 import { ToastContainer, ToastMessage } from 'react-toastr';
 
 import MissionApi from '../../api/Mission.js';
-import config from '../../config';
 import { hashHistory } from 'react-router';
+import _ from 'lodash';
 
 const ToastMessageFactory = React.createFactory(ToastMessage.animation);
-import TextInput from '../ui/TextInput';
 
 class MissionPlanner extends Component {
 
   constructor(props) {
     super(props);
+
+    this.missionApi = new MissionApi(config.api.basePath, props.auth);
+
+    // handlers
     this.handleMapClick = this.handleMapClick.bind(this);
     this.handleMarkerClick = this.handleMarkerClick.bind(this);
-    this.handleMissionItemUpdate = this.handleMissionItemUpdate.bind(this);
-    this.doHandleMarkerClick = this.doHandleMarkerClick.bind(this);
+    this.handleMissionItemCancel = this.handleMissionItemCancel.bind(this);
+    this.handleMissionItemSave = this.handleMissionItemSave.bind(this);
+    this.handleMissionItemDelete = this.handleMissionItemDelete.bind(this);
+    this.handleMissionItemHeaderClick = this.handleMissionItemHeaderClick.bind(this);
     this.clearAll = this.clearAll.bind(this);
     this.save = this.save.bind(this);
-    this.missionApi = new MissionApi(config.api.basePath, props.auth);
+    this.addPoint = this.addPoint.bind(this);
+
+    // initial state
     this.state = {
-      // the path markers
-      markers: [],
+      missionId: this.props.id,
+      missionName: '',
       missionItems: [],
-      idSequence: 0
+      openedMissionItems: [], // opened 'tabs' in the mission list panel on the right sidebar
+      centerMapOnUpdate: false // whether to center map after points are updated
     }
   }
 
+  /**
+   * Load data when component in mounted
+   */
+  componentDidMount() {
+    this.loadMission();
+  }
+
+  /**
+   * Loads existed mission from the server
+   */
+  loadMission() {
+    if ( this.state.missionId ) {
+      this.missionApi.getSingle(this.state.missionId).then((mission) => {
+        const missionItems = mission.missionItems;
+
+        // add planned home position to missionItems list
+        missionItems.unshift(mission.plannedHomePosition);
+
+        // init markers for all missionItems and extend missionItems
+        missionItems.forEach((missionItem) => {
+          // add unique id
+          missionItem.keyId = _.uniqueId();
+        });
+
+        this.setState({
+          missionName: mission.missionName,
+          missionItems: missionItems,
+          centerMapOnUpdate: true
+        });
+      });
+    }
+  }
+
+  /**
+   * Clear all mission poitns
+   */
   clearAll() {
-    this.poly.setMap(null);
-    this.poly = null;
-    this.state.markers.forEach((single) => {
-      single.setMap(null);
-    });
-    this.setState({ markers: [], missionItems: [], idSequence: 0 });
+    this.setState({ missionItems: [], openedMissionItems: [], centerMapOnUpdate: false });
   }
 
+  /**
+   * Callback when mission name is valid
+   * @param  {string} value mission name from text field
+   */
   onValidMissionName(value) {
-    this.setState({ missionName: value });
+    this.setState({ missionName: value, centerMapOnUpdate: false });
   }
 
+  /**
+   * Save current mission
+   * @param  {Event} event
+   */
   save(event) {
     event.preventDefault();
     const _self = this;
-    if (_self.state.missionItems.length === 0) {
+
+    if (_self.state.missionItems.length < 2) {
       _self.toastContainer.warning('',
-        'Add some waypoints before saving a mission', {
+        'Add at least two waypoints before saving a mission', {
         timeOut: 3000,
         preventDuplicates:true
       });
@@ -69,78 +118,194 @@ class MissionPlanner extends Component {
         timeOut: 3000,
         preventDuplicates:true
       });
-    } else {
-      // save the mission
-      _self.missionApi.save(_self.state.missionName, _self.state.missionItems, _self.state.plannedHomePosition).then(() => {
-        _self.toastContainer.success('',
-          'Mission saved', {
-          timeOut: 1000,
-          preventDuplicates:false
-        });
-        setTimeout(() => {
-          hashHistory.push('/list');
-        }, 2000);
+    } else if (_self.state.openedMissionItems.length) {
+      _self.toastContainer.warning('',
+        'Cancel or Save currently edited waypoints first', {
+        timeOut: 3000,
+        preventDuplicates:true
       });
+    } else {
+      // prepeare missionItems for saving
+      const missionItems = _self.state.missionItems.map((missionItem) => {
+        var clone = _.clone(missionItem);
+        delete clone.keyId;
+        return clone;
+      });
+
+      // save the mission
+      if ( _self.state.missionId ) {
+        _self.missionApi.update(_self.state.missionId, _self.state.missionName, missionItems.slice(1), missionItems[0]).then(() => {
+          _self.onSaveSuccess('Mission updated');
+        });
+      } else {
+        _self.missionApi.save(_self.state.missionName, missionItems.slice(1),  missionItems[0]).then(() => {
+          _self.onSaveSuccess('Mission saved');
+        });
+      }
     }
   }
 
   /**
+   * Callback when mission is succesfully save
+   * @param  {string} messageText Text of the messge to show
+   */
+  onSaveSuccess(messageText) {
+    this.toastContainer.success('',
+      messageText, {
+        timeOut: 1000,
+        preventDuplicates:false
+      }
+    );
+
+    setTimeout(() => {
+      hashHistory.push('/list');
+    }, 2000);
+  }
+
+  /**
+   * Returns mission item index in mission item list identified by keyId
+   * @param  {Object} missionItem  mission item we are looking for
+   * @param  {Array}  missionItems mission item list
+   * @return {Number}              mission item index
+   */
+  getMissionItemIndex(missionItem, missionItems) {
+    let missionItemIndex = -1;
+
+    for ( let tmlItem of missionItems ) {
+      missionItemIndex++
+      if ( tmlItem.keyId === missionItem.keyId ) {
+        break;
+      }
+    }
+
+    return missionItemIndex;
+  }
+
+  /**
+   * Handle the mission item update is canceled fired from WissionPointListItem component
+   * @param  {Object}     missionItem       edited but canceled value of missionItem
+   */
+  handleMissionItemCancel(missionItem) {
+    this.closeMissionItemPanel(missionItem);
+  }
+
+  /**
    * Handle the mission item update fired from info window component
-   * @param  {Number}     id                the id of mission item in mission items array
    * @param  {Object}     missionItem       the updated mission item
    */
-  handleMissionItemUpdate(id, missionItem) {
-    if (id === 0) {
-      this.setState({ plannedHomePosition: missionItem });
-    } else {
-      const missionItems = this.state.missionItems;
-      missionItems.splice(id - 1, 1, missionItem);
-      this.setState({ missionItems: missionItems });
-    }
+  handleMissionItemSave(missionItem) {
+    this.setState((prevState) => {
+      const missionItems = _.clone(prevState.missionItems);
+      const missionItemIndex = this.getMissionItemIndex(missionItem, missionItems);
+
+      missionItems.splice(missionItemIndex, 1, missionItem);
+
+      return { missionItems: missionItems, centerMapOnUpdate: false }
+    });
+    this.closeMissionItemPanel(missionItem);
+  }
+
+  /**
+   * Handle the mission item delete fired from info window component on delete button press
+   * @param  {Object} missionItem          the id of mission item in mission items array
+   */
+  handleMissionItemDelete(missionItem) {
+    this.setState((prevState) => {
+      let missionItems = _.clone(prevState.missionItems);
+      const missionItemIndex = this.getMissionItemIndex(missionItem, missionItems);
+
+      missionItems.splice(missionItemIndex, 1);
+      missionItems = missionItems.map((missionItem, index) => {
+        // tekeoff point
+        if ( index === 1 ) {
+          missionItem.command = config.takeoffMissionItemCommand;
+        }
+        missionItem.id = index;
+        return missionItem;
+      });
+
+      return { missionItems: missionItems, centerMapOnUpdate: false }
+    });
+    this.closeMissionItemPanel(missionItem);
+  }
+
+  /**
+   * Handle mission item header click in right panel
+   * @param  {Object} missionItem the mission item object
+   */
+  handleMissionItemHeaderClick(missionItem) {
+    this.openMissionItemPanel(missionItem);
   }
 
   /**
    * Actual marker click handler
    * @param  {MouseEvent}     event         the MouseEvent object fired by google map api
-   * @param  {Marker}         marker        the maker which is clicked
+   * @param  {Object}         missionItem   the mission item object
    */
-  doHandleMarkerClick(event, marker) {
-    const _self = this;
-    const google = window.google;
-    const div = document.createElement('div');
-    const id = marker.get('id');
-    ReactDOM.render(_self.renderInfoWindow(marker.getLabel().text, { lat: marker.getPosition().lat(),
-      lng: marker.getPosition().lng() }, id), div);
-    const infoWindow = new google.maps.InfoWindow({
-      content: div,
-      maxWidth: 400
-    });
-    infoWindow.open(_self.map, marker);
+  handleMarkerClick(event, missionItem) {
+    this.openMissionItemPanel(missionItem);
   }
 
   /**
-   * Attach the click event on marker and handle the click event on the marker
-   * @param   {object}       event          the propogated event
+   * Open mission item panel
+   * @param  {Object} missionItem the mission item object
    */
-  handleMarkerClick(marker) {
-    const _self = this;
-    marker.addListener('click', (event) => {
-      _self.doHandleMarkerClick(event, marker);
+  openMissionItemPanel(missionItem) {
+    this.setState((prevState) => {
+      if ( prevState.openedMissionItems.indexOf(missionItem.keyId) < 0 ) {
+        const openedMissionItems = _.clone(prevState.openedMissionItems);
+        openedMissionItems.push(missionItem.keyId);
+        return { openedMissionItems: openedMissionItems, centerMapOnUpdate: false };
+      }
     });
   }
 
-  getCommandValue(type) {
-    return (type === 'H' || type !== 'T') ? 16 : 22;
+  /**
+   * Close mission item panel
+   * @param  {Object} missionItem the mission item object
+   */
+  closeMissionItemPanel(missionItem) {
+    this.setState((prevState) => {
+      let missionItemIndex = prevState.openedMissionItems.indexOf(missionItem.keyId)
+      if ( missionItemIndex > -1 ) {
+        const openedMissionItems = _.clone(prevState.openedMissionItems);
+        openedMissionItems.splice(missionItemIndex, 1)
+        return { openedMissionItems: openedMissionItems, centerMapOnUpdate: false };
+      }
+    });
   }
 
   /**
-   * Render the info window for the specified type i.e, H, T, W
+   * Create missionItem
+   * @param  {Integer} missionItemIndex  mission item index in the list
+   * @param  {Number} lat               Latitude
+   * @param  {Number} lng               Longitude
+   * @param  {Number} alt               Altitude
+   * @return {Object}                   missionItem
    */
-  renderInfoWindow(type, position, id) {
-    return (
-      <InfoWindow type={type} onUpdate={this.handleMissionItemUpdate} id={id} position={position} param1={0.000000}
-        param2={0.000000} param3={0.000000} param4={0.000000} altitude={25.000000} command={this.getCommandValue(type)} frame={3} />
-    );
+  getMissionItem(missionItemIndex, lat, lng, alt) {
+    return _.extend({}, config.defaultMissionItem, {
+      keyId: _.uniqueId(),
+      command: missionItemIndex === 1 ? config.takeoffMissionItemCommand : config.defaultMissionItem.command,
+      coordinate: [lat, lng, alt],
+      id: missionItemIndex
+    });
+  }
+
+  /**
+   * Add new point to mission item list
+   * @param {Object} latLng coordinates of the point
+   * @param {[type]} alt    altitude of the point
+   */
+  addPoint(latLng, alt) {
+    this.setState((prevState) => {
+      const missionItems = _.clone(prevState.missionItems);
+      const missionItemIndex = missionItems.length;
+      const missionItem = this.getMissionItem(missionItemIndex, latLng.lat(), latLng.lng(), alt);
+      missionItems.push(missionItem);
+
+      return { missionItems: missionItems, centerMapOnUpdate: false }
+    });
   }
 
   /**
@@ -148,129 +313,7 @@ class MissionPlanner extends Component {
    * @param   {object}       event          the propogated event
    */
   handleMapClick(event) {
-    const google = window.google;
-    const _self = this;
-    if (!_self.poly) {
-      _self.poly = new google.maps.Polyline({
-        strokeColor: '#ff794d',
-        strokeOpacity: 1.0,
-        strokeWeight: 2
-      });
-      _self.poly.setMap(_self.map);
-    }
-    const path = _self.poly.getPath();
-    const markers = _self.state.markers;
-    let idSequence = this.state.idSequence;
-    const markerOpts = {
-      position: event.latLng,
-      cursor: 'pointer',
-      map: _self.map,
-      icon: circleGreen
-    };
-    if (idSequence === 0) {
-      // add the home
-      markerOpts.label = {
-        color: '#759e57',
-        text: 'H',
-        fontWeight: '800'
-      };
-    } else if (idSequence === 1) {
-      // add the takeoff marker
-      markerOpts.label = {
-        color: '#759e57',
-        text: 'T',
-        fontWeight: '800'
-      };
-    } else {
-      // add general waypoint marker
-      markerOpts.label = {
-        color: '#759e57',
-        text: `${idSequence}`,
-        fontWeight: '800'
-      };
-    }
-    const marker = new google.maps.Marker(markerOpts);
-    marker.set('id', idSequence);
-    const missionItems = this.state.missionItems;
-    if (idSequence !== 0) {
-      // if id sequence is 0 than it is home point, so home point is not added to mission items.
-      missionItems.push({
-        autoContinue: true,
-        command: idSequence === 1 ? 22 : 16,
-        coordinate: [event.latLng.lat(), event.latLng.lng(), 25.000000],
-        frame: 3,
-        id: idSequence,
-        param1: 0.000000,
-        param2: 0.000000,
-        param3: 0.000000,
-        param4: 0.000000,
-        type: 'missionItem'
-      });
-    } else {
-      this.setState({ plannedHomePosition: {
-        autoContinue: true,
-        command: 16,
-        coordinate: [event.latLng.lat(), event.latLng.lng(), 25.000000],
-        frame: 0,
-        id: idSequence,
-        param1: 0.000000,
-        param2: 0.000000,
-        param3: 0.000000,
-        param4: 0.000000,
-        type: 'missionItem'
-      }});
-    }
-    idSequence += 1;
-    this.handleMarkerClick(marker);
-    markers.push(marker);
-    _self.setState({ markers: markers, idSequence: idSequence, missionItems: missionItems });
-    if (idSequence !== 1) {
-      path.push(event.latLng);
-    }
-  }
-
-  shouldComponentUpdate() {
-    // never update the map, rendering is delegated to google api
-    return false;
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (this.props.loaded === false && nextProps.loaded === true) {
-      this.loadMap();
-    }
-  }
-
-  componentDidMount() {
-    if (this.props.loaded === true) {
-      this.loadMap();
-    }
-  }
-
-  componentWillUnmount() {
-    const _self = this;
-    if (_self.poly) {
-      _self.poly.setMap(null);
-      _self.poly = null;
-    }
-    // remove all markers
-    _self.state.markers.forEach((single) => {
-      single.setMap(null);
-    });
-    _self.map = null;
-  }
-
-  loadMap() {
-    const _self = this;
-    const google = window.google;
-    _self.map = new google.maps.Map(_self.mapElement, {
-      center: {
-        lat: _self.props.lat,
-        lng: _self.props.lng
-      },
-      zoom: _self.props.zoom,
-    });
-    // add click listener on map
-    _self.map.addListener('click', this.handleMapClick);
+    this.addPoint(event.latLng, config.defaultMissionItem.coordinate[2]);
   }
 
   render() {
@@ -283,26 +326,30 @@ class MissionPlanner extends Component {
           </Col>
         </Row>
         <Row className="show-grid m-b-10">
-          <Col xs={6} md={6}>
-            <Form horizontal>
-              <TextInput name="Name" placeholder="Enter mission name" onValid={this.onValidMissionName.bind(this)} />
-              <FormGroup>
-                <Col smOffset={2} sm={10}>
-                  <Button type="submit" bsSize="small" onClick={this.save}>Save</Button>
-                </Col>
-              </FormGroup>
-            </Form>
-          </Col>
+          { !this.state.missionId &&
+            <Col xs={6} md={6}>
+              <Form horizontal>
+                <TextInput name="Name" placeholder="Enter mission name" onValid={this.onValidMissionName.bind(this)} />
+                <FormGroup>
+                  <Col smOffset={2} sm={10}>
+                    <Button type="submit" bsSize="small" onClick={this.save}>Save</Button>
+                  </Col>
+                </FormGroup>
+              </Form>
+            </Col>
+          }
           <Col xs={6} md={6} className="pull-right">
             <ButtonToolbar className="pull-right">
+              {this.state.missionId && <Button type="submit" bsSize="small" onClick={this.save}>Update</Button>}
               <Button bsSize="small" onClick={this.clearAll}>Clear All</Button>
               <a type="button" className="btn btn-sm btn-default" href="#/list">List All missions</a>
             </ButtonToolbar>
           </Col>
         </Row>
-        <Row className="show-grid map-container-wrapper">
+        <Row className="map-container-wrapper">
           <Col xs={12} md={12}>
-            <div id="map-container" ref={ (element) => this.mapElement = element } />
+            <MissionPointList missionItems={this.state.missionItems} onMissionItemCancel={this.handleMissionItemCancel} onMissionItemSave={this.handleMissionItemSave} onMissionItemDelete={this.handleMissionItemDelete} openedListItems={this.state.openedMissionItems} onPanelHeaderClick={this.handleMissionItemHeaderClick} />
+            <MissionMap missionItems={this.state.missionItems} onMapClick={this.handleMapClick} onMarkerClick={this.handleMarkerClick} loaded={this.props.loaded} centerOnUpdate={this.state.centerMapOnUpdate} />
           </Col>
         </Row>
       </Grid>

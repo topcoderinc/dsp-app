@@ -2,13 +2,16 @@ react-app
 ---
 
 # Local Deployment
-Copy `envSample` as `.env`.
-Install node dependencies using `npm install`
-Run the development server using `npm run start`
+- Copy `envSample` as `.env` and configure variables described in section below
+- Install node dependencies using `npm install`
+- Run the development server using `npm run start`
+- `http://localhost:3000` should be opened in the browser after succesfull server run
 
 
 # Local Configuration Variables
 You can edit them in `.env` file.
+- Set `REACT_APP_GOOGLE_API_KEY` to google API key which can be obtained [here](https://console.developers.google.com/flows/enableapi?apiid=maps_backend%2Cgeocoding_backend%2Cdirections_backend%2Cdistance_matrix_backend%2Celevation_backend%2Cplaces_backend&reusekey=true)
+- Set `REACT_APP_AUTH0_CLIEND_ID` and `REACT_APP_AUTH0_DOMAIN` which can be obtained at [Auth0](https://auth0.com/)
 
 # Heroku Deployment
 ```

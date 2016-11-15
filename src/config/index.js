@@ -21,6 +21,26 @@ const config = {
   },
   AUTH0_CLIEND_ID: process.env.REACT_APP_AUTH0_CLIEND_ID,
   AUTH0_DOMAIN: process.env.REACT_APP_AUTH0_DOMAIN,
+
+  defaultGoogleMapConfig: {
+    center: {
+      lat: 42.010,
+      lng: -96.824,
+    },
+    zoom: 9,
+  },
+  takeoffMissionItemCommand: 22,
+  defaultMissionItem: {
+    autoContinue: true,
+    command: 16,
+    coordinate: [0, 0, 0],
+    frame: 3,
+    param1: 0.000000,
+    param2: 0.000000,
+    param3: 0.000000,
+    param4: 0.000000,
+    type: 'missionItem'
+  }
 };
 
 export default config;

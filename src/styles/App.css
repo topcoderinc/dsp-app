@@ -17,13 +17,11 @@
 }
 #map-container {
   height: 100%;
+  overflow: hidden;
 }
 .col-centered {
   margin: 0 auto;
   float: none;
-}
-.info-window-container {
-  max-width: 400px;
 }
 .gm-style-iw {
   overflow: visible !important;
@@ -37,5 +35,30 @@
   margin-bottom: 10px;
 }
 .full-width {
+  width: 100%;
+}
+
+.mission-point-list {
+  background-color: #fff;
+  float: right;
+  height: 100%;
+  overflow: auto;
+  width: 400px;
+}
+
+.mission-point-list .panel {
+  margin-bottom: 2px;
+}
+
+.mission-point-list .panel-title > a {
+  display: block;
+  margin: -15px -10px;
+  padding: 15px 10px;
+}
+
+.mission-point-list .panel-title > a:after {
+  clear: both;
+  content: '';
+  display: table;
   width: 100%;
 }

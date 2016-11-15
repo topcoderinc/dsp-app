@@ -16,9 +16,9 @@ import './styles/index.css';
 import { Router, Route, hashHistory, IndexRedirect } from 'react-router';
 import Login from './components/auth/Login.js';
 import GoogleApiComponent from './components/maps/GoogleApiComponent.js';
-import MissionPlannerWrapper from './components/mission/MissionPlannerWrapper.js';
-import EditMissionPlannerWrapper from './components/mission/EditMissionPlannerWrapper.js';
-import MissionPlannerList from './components/mission/MissionPlannerList.js';
+import MissionPlannerCreate from './components/mission/MissionPlannerCreate.js';
+import MissionPlannerEdit from './components/mission/MissionPlannerEdit.js';
+import MissionList from './components/mission/MissionList.js';
 import AuthService from './components/auth/utils/AuthService.js';
 
 const auth = new AuthService(config.AUTH0_CLIEND_ID, config.AUTH0_DOMAIN);
@@ -76,9 +76,9 @@ const routes = (
       <Route path="signup" component={Signup} onEnter={authRedirect} />
       <Route path="login" component={Login} onEnter={authRedirect} />
       <Route path="drones" component={GoogleApiComponent} />
-      <Route path="list" component={MissionPlannerList} onEnter={requireAuth} />
-      <Route path="missions/:id" component={EditMissionPlannerWrapper} />
-      <Route path="planner" component={MissionPlannerWrapper} onEnter={requireAuth} />
+      <Route path="list" component={MissionList} onEnter={requireAuth} />
+      <Route path="missions/:id" component={MissionPlannerEdit}  onEnter={requireAuth} />
+      <Route path="planner" component={MissionPlannerCreate} onEnter={requireAuth} />
       <Route path="access_token=:token" />
     </Route>
   </Router>

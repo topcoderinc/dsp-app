@@ -69,7 +69,7 @@ class GoogleMap extends Component {
   componentWillUnmount() {
     const _self = this;
     // remove all markers
-    _self.markers.forEach((single) => {
+    _self.markers &&  _self.markers.forEach((single) => {
       single.setMap(null);
     });
   }
