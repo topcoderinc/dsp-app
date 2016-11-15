@@ -8,7 +8,7 @@
  * @author       TCSCODER
  * @version      1.0.0
  */
- import circleGreen from '../../../i/circle_green.svg';
+ import circleGreen from '../../../i/circle_cubs.svg';
 
  /**
   * Clear all markers (waypoints)
