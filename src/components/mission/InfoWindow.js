@@ -45,12 +45,14 @@ class InfoWindow extends Component {
   }
 
   getSelectedCommand() {
-    if (this.state.type === 'T') {
-      return 'Takeoff';
-    } else if (this.state.type === 'W') {
-      return 'Waypoint';
-    } else {
-      return '';
+    if (this.state.command === 22) {
+      return `Takeoff (${this.state.command} / ${this.state.type} ) `;
+    } else if (this.state.command === 16) {
+      return `Waypoint (${this.state.command} / ${this.state.type} ) `;
+    } else if (this.state.command === 21) {
+      return `Land (${this.state.command} / ${this.state.type} ) `;
+    }  else {
+      return `command: ${this.state.command} / type: ${this.state.type}  `;
     }
   }
 

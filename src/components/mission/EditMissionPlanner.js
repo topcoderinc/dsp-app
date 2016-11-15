@@ -61,7 +61,7 @@ class EditMissionPlanner extends Component {
    * @param   {object}       event          the propogated event
    */
   handleMapClick(event) {
-    this.addPoint(this, event.latLng, 0);
+    MapHelper.addPoint(this, event.latLng, 0);
   }
 
   componentWillReceiveProps(nextProps) {
