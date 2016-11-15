@@ -198,6 +198,30 @@ class InfoWindow extends Component {
               </Col>
             </Row>
             <Form horizontal>
+            <FormGroup>
+              <Col componentClass={ControlLabel} sm={2}>
+                Lat/X:
+              </Col>
+              <Col sm={10}>
+                <InputGroup className="full-width">
+                  <FormControl type="text" placeholder={this.state.lat}
+                    ref={(latElem) => this.latitudeElement = latElem}
+                      onChange={this.handlePointChange.bind(this, 'lat')} />
+                </InputGroup>
+              </Col>
+            </FormGroup>
+            <FormGroup>
+              <Col componentClass={ControlLabel} sm={2}>
+                Lon/Y:
+              </Col>
+              <Col sm={10}>
+                <InputGroup className="full-width">
+                  <FormControl type="text" placeholder={this.state.lng}
+                    ref={(lngElem) => this.longitudeElement = lngElem}
+                      onChange={this.handlePointChange.bind(this, 'lng')} />
+                </InputGroup>
+              </Col>
+            </FormGroup>
               <FormGroup>
                 <Col componentClass={ControlLabel} sm={2}>
                   Param1:
