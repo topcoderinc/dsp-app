@@ -175,6 +175,30 @@
    initPolyline(_self);
  }
 
+ function latLng2Point(latLng, map) {
+  const google = window.google;
+  var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+  var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+  var scale = Math.pow(2, map.getZoom());
+  var worldPoint = map.getProjection().fromLatLngToPoint(latLng);
+  return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
+}
+
+function point2LatLng(point, map) {
+  const google = window.google;
+  var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+  var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+  var scale = Math.pow(2, map.getZoom());
+  var worldPoint = new google.maps.Point(point.x / scale + bottomLeft.x, point.y / scale + topRight.y);
+  return map.getProjection().fromPointToLatLng(worldPoint);
+}
+
+function offsetLatLng(latLng, map){
+  var point = latLng2Point(latLng, map);
+  point.y -= 10;
+  return point2LatLng(point, map);
+}
+
 /**
  * Draw Polyline on the map
  *
@@ -184,8 +208,9 @@
    const google = window.google;
    const locations = [];
    for (let i=1;i<_self.state.markers.length;i++) {
-     locations.push(_self.state.markers[i].getPosition());
+     locations.push(offsetLatLng(_self.state.markers[i].getPosition(), _self.map));
    }
+
    if (_self.poly) _self.poly.setMap(null);
    _self.poly = new google.maps.Polyline({
      path: locations,
@@ -283,5 +308,8 @@
    addPoint,
    deleteWaypoint,
    initPolyline,
-   getMarkerOpts
+   getMarkerOpts,
+   latLng2Point,
+   point2LatLng,
+   offsetLatLng
  };
