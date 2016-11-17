@@ -33,4 +33,3 @@ git commit --allow-empty -m "Set REACT_APP_API_BASE_PATH config var"
 git push heroku HEAD:master
 ```
 
-dev
