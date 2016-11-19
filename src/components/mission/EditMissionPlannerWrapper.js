@@ -11,16 +11,18 @@
 import React, { Component } from 'react';
 import EditMissionPlanner from './EditMissionPlanner.js';
 
+const defaultMapLocation = {
+  lat: 42.010,
+  lng: -96.824,
+  zoom: 9
+}
+
 class EditMissionPlannerWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
       // represents the map options
-      mapOpts: {
-        lat: 42.010,
-        lng: -96.824,
-        zoom: 9
-      },
+      mapOpts: defaultMapLocation,
       id: props.params.id
     }
   }
