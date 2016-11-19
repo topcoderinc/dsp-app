@@ -9,6 +9,24 @@
  * @version      1.0.0
  */
  import circleGreen from '../../../i/circle_cubs.svg';
+ 
+ const errorMsgTimeOut = 3000;
+ const savedMsgTimeOut = 1000;
+ const markerConfig = {
+   color: '#759e57',
+   fontWeight: '800'
+ };
+ const PolylineConfig = {
+   color: '#ff794d',
+   opacity: 1.0,
+   weight: 2
+ };
+ const defaultMarkerParams = {
+   param1: 0.000000,
+   param2: 0.000000,
+   param3: 0.000000,
+   param4: 0.000000
+ };
 
  /**
   * Clear all markers (waypoints)
@@ -35,13 +53,13 @@
    if (_self.state.missionItems.length === 0) {
      _self.toastContainer.warning('',
        'Add some waypoints before saving a mission', {
-       timeOut: 3000,
+       timeOut: errorMsgTimeOut,
        preventDuplicates:true
      });
    } else if (!_self.state.missionName) {
      _self.toastContainer.warning('',
        'Enter a mission name', {
-       timeOut: 3000,
+       timeOut: errorMsgTimeOut,
        preventDuplicates:true
      });
    } else {
@@ -50,7 +68,7 @@
        _self.missionApi.save(_self.state.missionName, _self.state.missionItems, _self.state.plannedHomePosition).then(() => {
          _self.toastContainer.success('',
          'Mission saved', {
-           timeOut: 1000,
+           timeOut: savedMsgTimeOut,
            preventDuplicates:false
          });
          setTimeout(() => {
@@ -62,7 +80,7 @@
        _self.missionApi.update(_self.props.missionId, _self.state.missionName, _self.state.missionItems, _self.state.plannedHomePosition).then(() => {
          _self.toastContainer.success('',
          'Mission updated', {
-           timeOut: 1000,
+           timeOut: savedMsgTimeOut,
            preventDuplicates:false
          });
          setTimeout(() => {
@@ -99,7 +117,7 @@
    marker.addListener('drag', (event) => {
      initPolyline(_self);
      const id = marker.get('id') - 1;
-     if (id > 0) {
+     if (id >= 0) {
        const curMissionItems = _self.state.missionItems;
        curMissionItems[id].coordinate[0] = marker.getPosition().lat();
        curMissionItems[id].coordinate[1] = marker.getPosition().lng();
@@ -165,9 +183,9 @@
    for (let i=0;i<markers.length;i++) {
      markers[i].set('id', i);
      markers[i].set('label', {
-       color: '#759e57',
+       color: markerConfig.color,
        text: i === 0 ? 'H' : i === 1 ? 'T' : i,
-       fontWeight: '800'
+       fontWeight: markerConfig.fontWeight
      });
    }
    _self.setState({idSequence: _self.state.idSequence-1});
@@ -189,9 +207,9 @@
    if (_self.poly) _self.poly.setMap(null);
    _self.poly = new google.maps.Polyline({
      path: locations,
-     strokeColor: '#ff794d',
-     strokeOpacity: 1.0,
-     strokeWeight: 2
+     strokeColor: PolylineConfig.color,
+     strokeOpacity: PolylineConfig.opacity,
+     strokeWeight: PolylineConfig.weight
    });
    _self.poly.setMap(_self.map);
  }
@@ -216,23 +234,23 @@
    if (idSequence === 0) {
      // add the home
      markerOpts.label = {
-       color: '#759e57',
+       color: markerConfig.color,
        text: 'H',
-       fontWeight: '800'
+       fontWeight: markerConfig.fontWeight
      };
    } else if (idSequence === 1) {
      // add the takeoff marker
      markerOpts.label = {
-       color: '#759e57',
+       color: markerConfig.color,
        text: 'T',
-       fontWeight: '800'
+       fontWeight: markerConfig.fontWeight
      };
    } else {
      // add general waypoint marker
      markerOpts.label = {
-       color: '#759e57',
+       color: markerConfig.color,
        text: `${idSequence}`,
-       fontWeight: '800'
+       fontWeight: markerConfig.fontWeight
      };
    }
    return markerOpts;
@@ -254,10 +272,10 @@
        coordinate: [lat, lng, alt],
        frame: 3,
        id: idSequence,
-       param1: 0.000000,
-       param2: 0.000000,
-       param3: 0.000000,
-       param4: 0.000000,
+       param1: defaultMarkerParams.param1,
+       param2: defaultMarkerParams.param2,
+       param3: defaultMarkerParams.param3,
+       param4: defaultMarkerParams.param4,
        type: 'missionItem'
      }
    }
@@ -267,10 +285,10 @@
      coordinate: [lat, lng, alt],
      frame: 0,
      id: idSequence,
-     param1: 0.000000,
-     param2: 0.000000,
-     param3: 0.000000,
-     param4: 0.000000,
+     param1: defaultMarkerParams.param1,
+     param2: defaultMarkerParams.param2,
+     param3: defaultMarkerParams.param3,
+     param4: defaultMarkerParams.param4,
      type: 'missionItem'
    }
  }
