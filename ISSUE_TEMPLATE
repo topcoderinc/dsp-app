@@ -1,4 +1,34 @@
 ![](https://scontent.ford1-1.fna.fbcdn.net/v/t1.0-9/14717161_10154488333556101_5487997839680388224_n.png?oh=fd410a07763a52f126ae17433dc85340&oe=58A1F9EB)
 
-We have a pretty decent start with out Drone Service Provider App and we are ready to make a bunch of small fixes and enhancements before we start to add some new features.   In the forum you will find the github repo to our front end.   
-You will be happy to know that it is pre-configure to connect to our working backend.    All you have to do is.
+## Intro
+
+
+## Requirements
+
+
+## Project Background
+
+
+For this series we are creating a Drone Service Platform (DSP) which consist of  a marketplace where customers can request  drone services for providers/operators. Examples of the services would be drone delivery, mapping, monitoring and many other tasks. In addition to delivering drone services we will also provide a level of traffic management. 
+
+
+
+
+## Other notable challenges in this series
+[Maps React and REST](https://www.topcoder.com/challenge-details/30055562)
+[React Map Mission Plan](http://www.topcoder.com/challenge-details/30055599/?type=develop&noncache=true) 
+[Mission Plan fixes part 1](https://www.topcoder.com/challenge-details/30055665)
+[WEBAPI - Consumer to DSP API Product Catalog - swagger API design](http://www.topcoder.com/challenge-details/30055646)
+
+
+# Links
+[front end src: topcoderinc/dsp-app](http://github.com/topcoderinc/dsp-app]
+[back end src: topcoderinc/dsp-app](http://github.com/topcoderinc/dsp-server]
+
+
+## Submission Guidelines
+1.  Ensure good test coverage on all modules
+2.  Upload documentation for how to run your submission
+3.  Upload all your source code as a zip for review
+4.  Winner will be required to submit a pull request with their winning code.
+5.  Please include a video with your submission.   If you are not comfortable with spoken english feel free to annotate with text.
