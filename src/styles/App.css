@@ -8,6 +8,9 @@
 .navbar-wrapper {
   height: 8%;
 }
+.map-container-wrapper {
+  position: relative;
+}
 .map-container-wrapper > div,
 .map-container-wrapper {
   height: 100%
@@ -18,12 +21,28 @@
 #map-container {
   height: 100%;
 }
+.sidebar {
+  background: rgba(0,0,0,.1);
+  height: auto;
+  min-height: 0;
+  max-height: 100%;
+  position: absolute;
+  right: 0;
+  overflow: auto;
+  padding: 4px;
+  margin: 0;
+}
 .col-centered {
   margin: 0 auto;
   float: none;
 }
 .info-window-container {
-  max-width: 400px;
+  max-width: 100%;
+  background: #f8f8f8;
+  border: 1px solid #e7e7e7;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  padding: 8px 14px;
 }
 .gm-style-iw {
   overflow: visible !important;
@@ -38,4 +57,10 @@
 }
 .full-width {
   width: 100%;
+}
+.hidden {
+  display: none;
+}
+.link {
+  cursor: pointer;
 }

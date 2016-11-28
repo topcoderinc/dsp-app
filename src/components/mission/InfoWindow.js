@@ -9,7 +9,7 @@
  * @version      1.0.0
  */
 import React, { Component } from 'react';
-import { Grid, Row, Col, Form, FormControl, InputGroup, ControlLabel, FormGroup } from 'react-bootstrap';
+import { Grid, Row, Col, Form, FormControl, InputGroup, ControlLabel, FormGroup, Glyphicon } from 'react-bootstrap';
 import '../../styles/App.css';
 import Select from 'react-select';
 
@@ -25,36 +25,39 @@ class InfoWindow extends Component {
     this.getSequence = this.getSequence.bind(this);
     this.handleCommandChange = this.handleCommandChange.bind(this);
     this.handleFrameChange = this.handleFrameChange.bind(this);
+    this.toggleFullBody = this.toggleFullBody.bind(this);
+    this.deleteSelf = this.deleteSelf.bind(this);
 
     // set initial state
     this.state = {
       type: props.type,
       command: props.command,
       frame: props.frame || 3,
-      lat: props.position.lat,
-      lng: props.position.lng,
-      altitude: props.altitude,
+      lat: props.coordinate[0],
+      lng: props.coordinate[1],
+      altitude: props.coordinate[2],
       param1: props.param1,
       param2: props.param2,
       param3: props.param3,
-      param4: props.param4
+      param4: props.param4,
+      fullBody: 'hidden'
     }
   }
 
   getSelectedCommand() {
-    if (this.state.type === 'H') {
-      return 'Planned Home Position';
-    } else if (this.state.type === 'T') {
-      return 'Takeoff';
-    } else if (this.state.type === 'W') {
-      return 'Waypoint';
-    } else {
-      return '';
+    if (this.state.command === 22) {
+      return `Takeoff (${this.state.command} / ${this.state.type} ) `;
+    } else if (this.state.command === 16) {
+      return `Waypoint (${this.state.command} / ${this.state.type} ) `;
+    } else if (this.state.command === 21) {
+      return `Land (${this.state.command} / ${this.state.type} ) `;
+    }  else {
+      return `command: ${this.state.command} / type: ${this.state.type}  `;
     }
   }
 
   getSequence() {
-    if (this.state.type !== 'H' && this.state.type !== 'T') {
+    if (this.state.type !== 'T') {
       return this.props.id;
     }
     return this.state.type;
@@ -80,6 +83,7 @@ class InfoWindow extends Component {
     const change = { };
     change[name] = this.getFloatValue(event.target.value);
     this.setState(change, cb);
+    console.log(this.state);
   }
 
   getMissionItem() {
@@ -122,10 +126,22 @@ class InfoWindow extends Component {
   }
 
   handlePointChange(name, event) {
-    this.updateState(name, event, () => {
+    const change = { };
+    change[name] = this.getFloatValue(event.target.value);
+    this.setState(change, () => {
       const missionItem = this.getMissionItem();
       this.props.onUpdate(this.props.id, missionItem);
     });
+
+  }
+
+  toggleFullBody() {
+    const newState = this.state.fullBody === 'hidden' ? 'visible' : 'hidden';
+    this.setState({fullBody: newState});
+  }
+
+  deleteSelf() {
+    this.props.deleteWaypoint(this.props.id);
   }
 
   render() {
@@ -133,9 +149,13 @@ class InfoWindow extends Component {
     return (
       <Grid className="info-window-container">
         <Row className="show-grid m-b-10">
+          <Col xs={1} md={1}><Glyphicon className="link" onClick={this.toggleFullBody}
+            glyph={this.state.fullBody === 'hidden' ? 'menu-down' : 'menu-up'} /></Col>
           <Col xs={2} md={2}>{this.getSequence()}</Col>
-          <Col xs={10} md={10} className="pull-right text-right">{this.getSelectedCommand()}</Col>
+          <Col xs={2} md={2} className="pull-right"><Glyphicon className="link" onClick={this.deleteSelf} glyph="trash" /></Col>
+          <Col xs={6} md={6} className="pull-right text-right">{this.getSelectedCommand()}</Col>
         </Row>
+        <div className={this.state.fullBody}>
         { isHome === false &&
           <Row className="show-grid m-b-10">
             <Col xs={12} md={12}>
@@ -151,28 +171,6 @@ class InfoWindow extends Component {
               </Col>
             </Row>
             <Form horizontal>
-              <FormGroup>
-                <Col componentClass={ControlLabel} sm={2}>
-                  Latitude:
-                </Col>
-                <Col sm={10}>
-                  <InputGroup className="full-width">
-                    <FormControl type="text" ref={(homeLatElem) => this.homeLatElement = homeLatElem}
-                      value={this.state.lat} onChange={this.handleHomeChange.bind(this, 'lat')} />
-                  </InputGroup>
-                </Col>
-              </FormGroup>
-              <FormGroup>
-                <Col componentClass={ControlLabel} sm={2}>
-                  Longitude:
-                </Col>
-                <Col sm={10}>
-                  <InputGroup className="full-width">
-                    <FormControl type="text" ref={(homeLngElem) => this.homeLngElement = homeLngElem}
-                      value={this.state.lng} onChange={this.handleHomeChange.bind(this, 'lng')} />
-                  </InputGroup>
-                </Col>
-              </FormGroup>
               <FormGroup>
                 <Col componentClass={ControlLabel} sm={2}>
                   Altitude:
@@ -202,6 +200,30 @@ class InfoWindow extends Component {
               </Col>
             </Row>
             <Form horizontal>
+            <FormGroup>
+              <Col componentClass={ControlLabel} sm={2}>
+                Lat/X:
+              </Col>
+              <Col sm={10}>
+                <InputGroup className="full-width">
+                  <FormControl type="text" placeholder={this.state.lat}
+                    ref={(latElem) => this.latitudeElement = latElem}
+                      onChange={this.handlePointChange.bind(this, 'lat')} />
+                </InputGroup>
+              </Col>
+            </FormGroup>
+            <FormGroup>
+              <Col componentClass={ControlLabel} sm={2}>
+                Lon/Y:
+              </Col>
+              <Col sm={10}>
+                <InputGroup className="full-width">
+                  <FormControl type="text" placeholder={this.state.lng}
+                    ref={(lngElem) => this.longitudeElement = lngElem}
+                      onChange={this.handlePointChange.bind(this, 'lng')} />
+                </InputGroup>
+              </Col>
+            </FormGroup>
               <FormGroup>
                 <Col componentClass={ControlLabel} sm={2}>
                   Param1:
@@ -252,35 +274,11 @@ class InfoWindow extends Component {
               </FormGroup>
               <FormGroup>
                 <Col componentClass={ControlLabel} sm={2}>
-                  Lat/X:
-                </Col>
-                <Col sm={10}>
-                  <InputGroup className="full-width">
-                    <FormControl type="text" placeholder={this.props.position.lat}
-                      ref={(latElem) => this.latitudeElement = latElem}
-                        onChange={this.handlePointChange.bind(this, 'lat')} />
-                  </InputGroup>
-                </Col>
-              </FormGroup>
-              <FormGroup>
-                <Col componentClass={ControlLabel} sm={2}>
-                  Lon/Y:
-                </Col>
-                <Col sm={10}>
-                  <InputGroup className="full-width">
-                    <FormControl type="text" placeholder={this.props.position.lng}
-                      ref={(lngElem) => this.longitudeElement = lngElem}
-                        onChange={this.handlePointChange.bind(this, 'lng')} />
-                  </InputGroup>
-                </Col>
-              </FormGroup>
-              <FormGroup>
-                <Col componentClass={ControlLabel} sm={2}>
                   Alt/Z:
                 </Col>
                 <Col sm={10}>
                   <InputGroup className="altitude">
-                    <FormControl type="number" placeholder={this.props.altitude}
+                    <FormControl type="number" placeholder={this.props.coordinate[2]}
                       ref={(altElem) => this.altitudeElement = altElem}
                         onChange={this.handlePointChange.bind(this, 'altitude')} />
                     <InputGroup.Addon>m</InputGroup.Addon>
@@ -290,6 +288,7 @@ class InfoWindow extends Component {
             </Form>
           </div>
         )}
+        </div>
       </Grid>
     );
   }

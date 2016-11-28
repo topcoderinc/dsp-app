@@ -6,7 +6,6 @@ Copy `envSample` as `.env`.
 Install node dependencies using `npm install`
 Run the development server using `npm run start`
 
-
 # Local Configuration Variables
 You can edit them in `.env` file.
 
