@@ -23,7 +23,7 @@ class UserApi {
   }
 
   login(email, password) {
-    const url = `${this.basePath}/api/v1/users/auth`;
+    const url = `${this.basePath}/api/v1/login`;
 
     return reqwest({ url: url, method: 'post', type: 'json',
       contentType: 'application/json',
@@ -34,19 +34,21 @@ class UserApi {
   }
 
   register(name, email, password) {
-    const url = `${this.basePath}/api/v1/users`;
+    const url = `${this.basePath}/api/v1/register`;
 
     return reqwest({ url: url, method: 'post', type: 'json',
       contentType: 'application/json',
       data: JSON.stringify({
-        name: name,
+        firstName: name,
+        lastName: name,
         email: email,
+        phone: "1",
         password: password,
       })});
   }
 
   registerSocialUser(name, email) {
-    const url = `${this.basePath}/api/v1/users/social`;
+    const url = `${this.basePath}/api/v1/login/social`;
 
     return reqwest({ url: url, method: 'post', type: 'json',
       contentType: 'application/json',
