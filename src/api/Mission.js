@@ -45,6 +45,7 @@ class MissionApi {
         plannedHomePosition: homePosition,
         missionItems: items,
         missionName: name,
+        status:'waiting',
       })});
   }
 
@@ -58,6 +59,7 @@ class MissionApi {
         plannedHomePosition: homePosition,
         missionItems: items,
         missionName: name,
+        status:'waiting',
       })});
   }
 

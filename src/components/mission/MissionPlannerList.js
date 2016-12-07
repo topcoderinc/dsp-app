@@ -26,13 +26,13 @@ class MissionPlannerList extends Component {
 
   componentDidMount() {
     this.missionApi.getAll().then((missions) => {
-      this.setState({ missions: missions });
+      this.setState({ missions: missions.items });
     });
   }
 
   refresh() {
     this.missionApi.getAll().then((missions) => {
-      this.setState({ missions: missions });
+      this.setState({ missions: missions.items });
     });
   }
 
