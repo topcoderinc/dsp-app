@@ -35,7 +35,7 @@ class GoogleMap extends Component {
   getMarkerConfig(drone) {
     const google = window.google;
     const config = { clickable: false, crossOnDrag: false,
-      cursor: 'pointer', position: new google.maps.LatLng(drone.lat, drone.lng) };
+      cursor: 'pointer', position: new google.maps.LatLng(drone.currentLocation[0],drone.currentLocation[1]) };
     switch (drone.status) {
       case 'in-motion':
         config.icon = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png';
@@ -90,7 +90,7 @@ class GoogleMap extends Component {
     });
     // get a list of all the drones
     droneApi.getAll().then((drones) => {
-      _self.markers = drones.map((single) => {
+      _self.markers = drones.items.map((single) => {
         const marker = new google.maps.Marker(_self.getMarkerConfig(single));
         // set the marker id, to identify a drone uniquely
         marker.set('id', single.id);
@@ -110,7 +110,7 @@ class GoogleMap extends Component {
       // find a marker by id
       const marker = _.find(_self.markers, { id: data.id });
       if (marker) {
-        marker.setPosition(new google.maps.LatLng(data.lat, data.lng));
+        marker.setPosition(new google.maps.LatLng(data.currentLocation[0], data.currentLocation[1]));
         // repaint the cluster
         _self.markerCluster.repaint();
       }
